@@ -56,15 +56,16 @@ void KalmanFilter::Update(const VectorXd &z)
 void KalmanFilter::UpdateEKF(const VectorXd &z)
 	{
 		VectorXd hx = VectorXd(3);
-		auto px = z[0];
-		auto py = z[1];
-		auto vx = z[2];
-		auto vy = z[3];
+		auto px = x_[0];
+		auto py = x_[1];
+		auto vx = x_[2];
+		auto vy = x_[3];
 
 		// Make sure that both the px and py are not equal to zero
 		if(px == 0 && py == 0)
 			{
-				px = 0.001;
+				px = 0.00001;
+				py = 0.00001;
 			}
 
 		hx[0] = sqrt(px*px+py*py);							// rho
@@ -73,7 +74,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z)
 
 		VectorXd y = z - hx;
 
-		// Normalize angle component.
+		// The value of phi should be between -pi and pi
 		y[1] = atan2(sin(y[1]),cos(y[1]));
 
 		MatrixXd S = H_ * P_* H_.transpose() + R_;
