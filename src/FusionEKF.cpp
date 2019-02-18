@@ -50,6 +50,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
   /**
    * Initialization
    */
+   
+  static int cycle_count = 0;
+  cycle_count ++;
+  
   if (!is_initialized_)
   {
     /**
@@ -67,7 +71,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
     // These values will be updated on each cycle.
     MatrixXd F = MatrixXd(4,4);
     MatrixXd Q = MatrixXd(4,4);
-    MatrixXd P = MatrixXd(4,4);
+	
+	// Initilaizing the State Covariance with Identity matrix
+    MatrixXd P = MatrixXd::Identity(4,4);
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR)
     {
@@ -103,6 +109,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
 
   // As the elapsed timestamp is in ticks, convert it to seconds
   auto del_t  = (measurement_pack.timestamp_ - previous_timestamp_)/1000000.0;
+  previous_timestamp_ = measurement_pack.timestamp_ ;
 
   /* Predict Function will be called only if the measurements received at
   ** different time */
@@ -151,6 +158,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
   }
 
   // print the output
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout << "P_ = " << ekf_.P_ << endl;
+  cout << "******************************************" << endl;
+  cout << "Measurement Data received :" << cycle_count << endl;
+  cout << "x_ = \n" << ekf_.x_ << endl;
+  cout << "P_ = \n" << ekf_.P_ << endl;
+  cout << "******************************************" << endl;
 }
