@@ -22,20 +22,66 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
   Q_ = Q_in;
 }
 
-void KalmanFilter::Predict() {
-  /**
-   * TODO: predict the state
-   */
-}
+/* The Predict function remains same for both Lidar and Radar
+ * sensor measurement inputs
+ * F_j is equal to F, as prediction is based on linear model. */
+void KalmanFilter::Predict()
+	{
+		x_ = F_ * x_ ;
+		P_ = F_ * P_ * F_.transpose() + Q_ ;
+	}
 
-void KalmanFilter::Update(const VectorXd &z) {
-  /**
-   * TODO: update the state by using Kalman Filter equations
-   */
-}
+/*This Update function will be called for measurement update
+ * operation for a Lidar sensor, as the inputs are Cartesian
+ * co-ordinates, and no conversions or jacobians are required. */
 
-void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  /**
-   * TODO: update the state by using Extended Kalman Filter equations
-   */
-}
+void KalmanFilter::Update(const VectorXd &z)
+	{
+
+		VectorXd y = z - (H_ * x_);
+		MatrixXd S = (H_ * P_ * H_.transpose()) + R_;
+		MatrixXd K = P_ * H_.transpose() * S.inverse();
+
+		//new estimate
+		x_ = x_ + (K * y);
+		int x_size = x_.size();
+		MatrixXd I = MatrixXd::Identity(x_size, x_size);
+		P_ = (I - K * H_) * P_;
+	}
+
+/* This UpdateEKF function will be called for measurements from
+ * radar is received, as the inputs are in polar form. Here, the
+ * conversions and computation of Jacobians are required. */
+
+void KalmanFilter::UpdateEKF(const VectorXd &z)
+	{
+		VectorXd hx = VectorXd(3);
+		auto px = z[0];
+		auto py = z[1];
+		auto vx = z[2];
+		auto vy = z[3];
+
+		// Make sure that both the px and py are not equal to zero
+		if(px == 0 && py == 0)
+			{
+				px = 0.001;
+			}
+
+		hx[0] = sqrt(px*px+py*py);							// rho
+		hx[1] = atan2(py,px);								// phi
+		hx[2] = (px * vx + py * vy) / (sqrt(px*px+py*py));	// rho_dot
+
+		VectorXd y = z - hx;
+
+		// Normalize angle component.
+		y[1] = atan2(sin(y[1]),cos(y[1]));
+
+		MatrixXd S = H_ * P_* H_.transpose() + R_;
+		MatrixXd K = P_ * H_.transpose() * S.inverse();
+
+		x_ = x_ + (K * y);
+		int x_size = x_.size();
+		MatrixXd I = MatrixXd::Identity(x_size,x_size);
+		P_ = (I - K * H_) * P_;
+
+	}
