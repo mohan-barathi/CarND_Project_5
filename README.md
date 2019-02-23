@@ -3,7 +3,7 @@
 ## Project : Extended Kalman Filter Project
 ### Term : 1, Project : 5
 
-In this project you we utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements.
+In this project we utilize Extended Kalman Filter to estimate the state of a moving object of interest with noisy lidar and radar measurements.
 
 ![dataset1_result](./Docs/EKF_Dataset_1.PNG)
 
@@ -24,12 +24,14 @@ Once the install for uWebSocketIO is complete, the main program can be built and
 5. ./ExtendedKF
 
 
-INPUT: values provided by the simulator to the c++ program
+### INPUT:
+values provided by the simulator to the c++ program
 
 ["sensor_measurement"] => the measurement that the simulator observed (either lidar or radar)
 
 
-OUTPUT: values provided by the c++ program to the simulator
+### OUTPUT:
+values provided by the c++ program to the simulator
 
 ["estimate_x"] <= kalman filter estimated position x
 
